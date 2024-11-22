@@ -231,14 +231,17 @@ if __name__ == "__main__":
         exit()
     outdir = os.path.join("output", "tickets", "{}-{}{}".format(args.gare, args.barcodeprefix, os.path.sep))
     os.makedirs(outdir, exist_ok=True)
+    cpt = 1
     for i in tqdm(range(args.min, args.max, 1)):
         # Generate barcode SVG
-        outp = "{}{}-{}.pdf".format(outdir, args.barcodeprefix+str(((i-1)*8)+1).zfill(7), str(i*8).zfill(7))
+        outp = "{}{}-{}.pdf".format(outdir, args.barcodeprefix+str(cpt).zfill(7), str(cpt+4).zfill(7))
         tmp = template_pdf_path
         for j in range(8):
             row, col = j // 2, j % 2
-            text_to_encode = "{}{}".format(args.barcodeprefix, str(((i-1)*8)+1+j).zfill(7))
-            barcode_svg_path = generate_barcode_svg(text_to_encode, barcode_filename)
+            if col == 0:
+                text_to_encode = "{}{}".format(args.barcodeprefix, str(cpt).zfill(7))
+                barcode_svg_path = generate_barcode_svg(text_to_encode, barcode_filename)
+                cpt += 1
             output_pdf_path = draw_barcode(barcode_svg_path, tmp, outp, row,col)
             # text_to_encode_ = "{}{}".format(args.barcodeprefix, str(i+1).zfill(7))
             # barcode_svg_path = generate_barcode_svg(text_to_encode_, barcode_filename)
