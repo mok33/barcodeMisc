@@ -17,6 +17,8 @@ from PyPDF2 import PdfReader, PdfWriter
 import io
 import fitz  # PyMuPDF for PDF handling
 from pypdf import PdfReader
+from test import add_first_page_to_pdf
+
 # Function to generate barcode as an SVG
 def generate_barcode_svg(text, filename):
     code128 = barcode.get('code128', text, writer=SVGWriter())
@@ -214,9 +216,9 @@ if __name__ == "__main__":
     parser.add_argument("--annee", required=True, help="Path to save the output PDF with the barcode")
     parser.add_argument("--montant", type=int, required=True, help="Path to save the output PDF with the barcode")
     parser.add_argument("--barcodeprefix", required=True, help="Text to encode in the barcode")
-    parser.add_argument("--output", required=True, help="Path to save the output PDF with the barcode")
-    parser.add_argument("--min", type=int, required=True, help="Path to save the output PDF with the barcode")
-    parser.add_argument("--max", type=int,required=True, help="Path to save the output PDF with the barcode")
+    parser.add_argument("--output", default='res.pdf', help="Path to save the output PDF with the barcode")
+    parser.add_argument("--min", type=int, default=1, help="Path to save the output PDF with the barcode")
+    parser.add_argument("--max", type=int, default=50, help="Path to save the output PDF with the barcode")
 
     args = parser.parse_args()
 
@@ -231,24 +233,28 @@ if __name__ == "__main__":
         exit()
     outdir = os.path.join("output", "tickets", "{}-{}{}".format(args.gare, args.barcodeprefix, os.path.sep))
     os.makedirs(outdir, exist_ok=True)
-    cpt = 1
-    for i in tqdm(range(args.min, args.max, 1)):
+    cpt = 0
+    import datetime
+    date = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    outp =  "{}{}_{}_{}_{}_max_{}_time_{}.pdf".format(outdir,  "ticket", args.barcodeprefix, args.gare, args.montant, args.max+1, date)
+    for i in tqdm(range(args.min, args.max+1, 1)):
         # Generate barcode SVG
-        outp = "{}{}-{}.pdf".format(outdir, args.barcodeprefix+str(cpt).zfill(7), str(cpt+4).zfill(7))
+        # outp = "{}{}_{}_{}.pdf".format(outdir, str(args.gare), str(args.barcodeprefix), str(i))
         tmp = template_pdf_path
         for j in range(8):
             row, col = j // 2, j % 2
             if col == 0:
-                text_to_encode = "{}{}".format(args.barcodeprefix, str(cpt).zfill(7))
+                text_to_encode = "{}{}".format(args.barcodeprefix, str(i+(50*row)).zfill(7))
                 barcode_svg_path = generate_barcode_svg(text_to_encode, barcode_filename)
                 cpt += 1
-            output_pdf_path = draw_barcode(barcode_svg_path, tmp, outp, row,col)
+            output_pdf_path = draw_barcode(barcode_svg_path, tmp, output_pdf_path, row,col)
             # text_to_encode_ = "{}{}".format(args.barcodeprefix, str(i+1).zfill(7))
             # barcode_svg_path = generate_barcode_svg(text_to_encode_, barcode_filename)
             # draw_barcode(barcode_svg_path, output_pdf_path, "{}{}-{}.pdf".format(outdir, text_to_encode, text_to_encode_), 0.48)
             # outp = "{}{}-{}.pdf".format(outdir, text_to_encode, text_to_encode_)
-            add_text_to_pdf(outp, outp,col,row, args.montant, args.annee, args.gare)
-            tmp = outp
+            add_text_to_pdf(output_pdf_path, output_pdf_path, col,row, args.montant, args.annee, args.gare)
+            tmp = output_pdf_path
+        add_first_page_to_pdf(output_pdf_path, outp, outp)
             # break
             # print(f"PDF with barcode saved as '{output_pdf_path}'")
 # from pdfwatermark.src.pdf_watermark.handler import add_watermark_to_pdf
