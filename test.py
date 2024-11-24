@@ -211,6 +211,7 @@ def add_first_page_to_pdf(source_pdf_path, writer):
     # # Write the combined PDF to the output file
     # with open(output_pdf_path, "wb") as output_pdf:
     #     writer.write(output_pdf)
+    writer.reset_translation(source_reader)
     return writer
 # Main logic to generate barcode and place it using the selected bounding box
 if __name__ == "__main__":
