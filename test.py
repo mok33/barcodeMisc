@@ -185,7 +185,7 @@ def add_text_to_pdf(template_pdf_path, output_pdf_path, montant='', annee='', ga
         page.insert_text((53+125+2, 763-(offset*idx)), f"{gare}", fontname=text_font, fontsize=text_size, color=text_color, rotate=90)
         page.insert_text((53+125+1+2, 490-(offset*idx)), f"{annee}", fontname=text_font, fontsize=text_size, color=text_color, rotate=90)
 
-        page.insert_text((70+233+2, 770-100-(offset*idx)), f"{montant}", fontname=text_font, fontsize=text_size+8, color=text_color, rotate=90)
+        page.insert_text((70+233+2, 770-100-(offset*idx)), f"{montant}", fontname=text_font, fontsize=text_size+2, color=text_color, rotate=90)
 
     # Save the modified PDF to the output path
     pdf_document.save(output_pdf_path, incremental=True, encryption=fitz.PDF_ENCRYPT_KEEP)
