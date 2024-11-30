@@ -265,7 +265,7 @@ if __name__ == "__main__":
             writer = add_first_page_to_pdf(output_pdf_path, writer)
             # print(f"PDF with barcode saved as '{output_pdf_path}'")
             pbar.update(1)
-        outp =  "{}{}_{}_{}_montant_{}_{}_sur_{}_ncarnet_{}_time_{}.pdf".format(outdir,  "carnet", args.barcodeprefix, args.gare, args.montant, ic+1, len(chunks), ncarnet, date)
+        outp =  "{}{}_{}_{}_{}_montant_{}_{}_sur_{}_ncarnet_{}.pdf".format(outdir,  "carnet", os.path.splitext(os.path.basename(args.pdftemplate))[0], args.barcodeprefix, args.gare, args.montant, ic+1, len(chunks), ncarnet)
         with open(outp, "wb") as output_pdf:
             writer.write(output_pdf)
     pbar.close()

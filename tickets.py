@@ -221,6 +221,7 @@ if __name__ == "__main__":
     parser.add_argument("--min", type=int, default=1, help="Path to save the output PDF with the barcode")
     parser.add_argument("--max", type=int, default=50, help="Path to save the output PDF with the barcode")
     parser.add_argument("--ncarnet", type=int, default=50, help="Path to save the output PDF with the barcode")
+    parser.add_argument("--carnet25", default=False, action='store_true')
 
     args = parser.parse_args()
 
@@ -237,7 +238,7 @@ if __name__ == "__main__":
     os.makedirs(outdir, exist_ok=True)
     cpt = 0
     ncarnet = (args.ncarnet + args.ncarnet%2)
-    max_ = ncarnet * 100
+    max_ = ncarnet * (50 if args.carnet25 else 100)
     import datetime
     date = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     pbar = tqdm(total=max_//4)
@@ -265,9 +266,12 @@ if __name__ == "__main__":
             add_first_page_to_pdf(output_pdf_path, writer)
             pbar.update(1)
 
-        outp =  "{}{}_{}_{}_montant_{}_{}_sur_{}_ncarnet_{}_time_{}.pdf".format(outdir,  "ticket", args.barcodeprefix, args.gare, args.montant, ic+1, len(chunks), ncarnet, date)
+        outp =  "{}{}_{}_{}_{}_montant_{}_{}_sur_{}_ncarnet_{}.pdf".format(outdir,  "ticket", os.path.splitext(os.path.basename(args.pdftemplate))[0], args.barcodeprefix, args.gare, args.montant, ic+1, len(chunks), ncarnet)
+        if args.carnet25:
+           outp = outp.replace(".pdf", "_carnet25.pdf")
         with open(outp, "wb") as output_pdf:
             writer.write(output_pdf)
+    pbar.close()
             # break
             # print(f"PDF with barcode saved as '{output_pdf_path}'")
 # from pdfwatermark.src.pdf_watermark.handler import add_watermark_to_pdf
