@@ -223,6 +223,7 @@ if __name__ == "__main__":
     parser.add_argument("--max", type=int, default=50, help="Path to save the output PDF with the barcode")
     parser.add_argument("--ncarnet", type=int, default=50, help="Path to save the output PDF with the barcode")
     parser.add_argument("--carnet25", default=False, action='store_true')
+    parser.add_argument("--carnet100", default=False, action='store_true')
 
     args = parser.parse_args()
 
@@ -239,7 +240,7 @@ if __name__ == "__main__":
     os.makedirs(outdir, exist_ok=True)
     cpt = 0
     ncarnet = (args.ncarnet + args.ncarnet%2)
-    max_ = ncarnet * (50 if args.carnet25 else 100)
+    max_ = ncarnet * (50 if args.carnet25 else 200 if args.carnet100 else 100)
     import datetime
     date = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     pbar = tqdm(total=max_//4)
