@@ -1,5 +1,5 @@
-from pdfwatermark.src.pdf_watermark.handler import add_watermark_to_pdf
-from pdfwatermark.src.pdf_watermark.options import InsertOptions, DrawingOptions
+from pdfwatermark.src.pdf_watermark_2.handler import add_watermark_to_pdf
+from pdfwatermark.src.pdf_watermark_2.options import InsertOptions, DrawingOptions
 
 import argparse
 import barcode
@@ -45,7 +45,7 @@ def get_barcode_dimensions(svg_path):
 
 def draw_barcode(barcode_svg_path, template_pdf_path, output_pdf_path, row, col):
     # Calculate coordinates for InsertOptions
-    offsetx, offsety = 170+16, 142
+    offsetx, offsety = 170, 142
     # page_height, page_width = letter  # Page dimensions for adjustment
     page_width, page_height = PdfReader(template_pdf_path).pages[0].mediabox[-2:]
     # Get dimensions of the generated barcode
@@ -56,37 +56,29 @@ def draw_barcode(barcode_svg_path, template_pdf_path, output_pdf_path, row, col)
     x1, y1, x2, y2 = bounding_box
     # print(bounding_box)
 
-    bbox_width = (x2 - x1)
-    bbox_height = (y2 - y1)
+    bbox_width = x2 - x1
+    bbox_height = y2 - y1
 
     # if offset != 0:
     #     x1 = x1 + offset * page_height + bbox_width
     #     x2 = x2 + offset * page_height + bbox_width
 
     # Compute scale factor based on the bounding box size
-    scale_x = (bbox_width / barcode_width) * 0.6
-    scale_y = (bbox_height / barcode_height) * 0.7
+    scale_x = bbox_width / barcode_width
+    scale_y = bbox_height / barcode_height
     # scale = min(scale_x, scale_y)  # Use the smaller scale to maintain aspect ratio
 
     # Scale the SVG and save it
-    scaled_barcode_svg_path = scale_svg(barcode_svg_path, [scale_x, scale_y])
+    scaled_barcode_svg_path = scale_svg(barcode_svg_path, [scale_x*0.7, scale_y*0.7])
 
     # for k in range(8):
         # row, col = k //2, k % 2
-    if col < 2:
-        opts_in = InsertOptions(
-            x=((176 + 22 + offsetx * col)/page_width),
-            y=(page_height-(44 - 9 + offsety * row)) / page_height,
-            horizontal_alignment="center",
-            svg=scaled_barcode_svg_path,
-        )
-    else:
-        opts_in = InsertOptions(
-            x=((176 + 22 + 2 + 350)/page_width),
-            y=(page_height-(54 + offsety * row)) / page_height,
-            horizontal_alignment="center",
-            svg=scaled_barcode_svg_path,
-        )
+    opts_in = InsertOptions(
+        x=(1/16)+(col/3.2),
+        y=(1-((1/7) + (row/4)) + max(0, (row)*1/140) - max(0, (row>1)*1/140)),
+        horizontal_alignment="center",
+        svg=scaled_barcode_svg_path,
+    )
     # opts_in = InsertOptions(
     #     x=0.1,
     #     y=0.5,
@@ -97,7 +89,7 @@ def draw_barcode(barcode_svg_path, template_pdf_path, output_pdf_path, row, col)
     opts = DrawingOptions(
         watermark="1.png",
         opacity=1,
-        angle=0,  # Angle set to 0 for upright barcode
+        angle=None,  # Angle set to 0 for upright barcode
         text_color="#000000",
         text_font="Helvetica",
         text_size=12,
@@ -187,20 +179,21 @@ def add_text_to_pdf(template_pdf_path, output_pdf_path, row, col, montant='', an
     pdf_document = fitz.open(template_pdf_path)
     page = pdf_document.load_page(0)
     offset = 400+20
-    offsetx, offsety = 200+35, 198
+    offsetx, offsety = 186, 198+9
     # Iterate over each page
     for idx in range(1):
         
         # Set text properties
         text_font = "helvetica-bold"
-        text_size = 9+1
+        text_size = 9
         text_color = (0, 0, 0)  # Black color in RGB
 
         # Add text to specific positions
         # page.insert_text((100, 700), f"Montant: {montant}", fontname=text_font, fontsize=text_size, color=text_color, rotate=90)
-        page.insert_text((54 + 5 + row * (offsetx-50), 89 + 4 + col * offsety), f"{gare}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
-        page.insert_text((54 + 15 + 5 + row * (offsetx-50), 89 - 11 + col * offsety), f"{montant}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
-        page.insert_text((195-15+row * (offsetx-50), 89 - 12 + col * offsety), f"{annee}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
+        page.insert_text((54+10+row *(offsetx), 89 - 8 + col * offsety), f"{montant}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
+        page.insert_text((142+row *(offsetx), 89 + 7 + col * offsety), f"{gare}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
+        page.insert_text((142+15+row *(offsetx), 89 - 8 + col * offsety), f"{annee}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
+
 
         # page.insert_text((53, 763-(offset*idx)), f"{gare}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
         # page.insert_text((53, 50), f"{annee}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
@@ -246,11 +239,11 @@ if __name__ == "__main__":
     os.makedirs(outdir, exist_ok=True)
     cpt = 0
     ncarnet = (args.ncarnet + args.ncarnet%2)
-    max_ = ncarnet * (75 if args.carnet25 else 150)
+    max_ = ncarnet * (50 if args.carnet25 else 100)
     import datetime
     date = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-    pbar = tqdm(total=max_//3+1)
-    chunks = np.array_split(np.arange(1, max_//3+1), max((max_)//(30*50), 1))
+    pbar = tqdm(total=max_//4)
+    chunks = np.array_split(np.arange(1, max_//4+1), max((max_)//(30*50), 1))
 
     for ic, chunk in enumerate(chunks):
         writer = PdfWriter()
@@ -258,13 +251,13 @@ if __name__ == "__main__":
         # outp = "{}{}_{}_{}.pdf".format(outdir, str(args.gare), str(args.barcodeprefix), str(i))
         for i in chunk:
             tmp = template_pdf_path
-            for j in range(3):
+            for j in range(4*3):
                 row, col = j // 3, j % 3
-                # if col == 0:
-                text_to_encode = "{}{}".format(args.barcodeprefix, str(i + (col * chunk[-1])).zfill(7))
-                barcode_svg_path = generate_barcode_svg(text_to_encode, barcode_filename)
-                cpt += 1
-                output_pdf_path = draw_barcode(barcode_svg_path, tmp, output_pdf_path, row, col)
+                if col == 0:
+                    text_to_encode = "{}{}".format(args.barcodeprefix, str(i+(((max_)//4)*row)).zfill(7))
+                    barcode_svg_path = generate_barcode_svg(text_to_encode, barcode_filename)
+                    cpt += 1
+                output_pdf_path = draw_barcode(barcode_svg_path, tmp, output_pdf_path, row,col)
                 # text_to_encode_ = "{}{}".format(args.barcodeprefix, str(i+1).zfill(7))
                 # barcode_svg_path = generate_barcode_svg(text_to_encode_, barcode_filename)
                 # draw_barcode(barcode_svg_path, output_pdf_path, "{}{}-{}.pdf".format(outdir, text_to_encode, text_to_encode_), 0.48)
