@@ -242,13 +242,13 @@ if __name__ == "__main__":
         exit()
     outdir = os.path.join("output", "{}-{}{}".format(args.gare, args.barcodeprefix, os.path.sep))
     os.makedirs(outdir, exist_ok=True)
-    min_ = 1
+    min_ = args.min
     ncarnet = (args.ncarnet + args.ncarnet%2)
     max_ = (ncarnet * args.incr)
     import datetime
     date = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     pbar = tqdm(total=(max_//2)+1)
-    chunks = np.array_split(np.arange(1, (max_//2)+1), max((max_)//(args.incr * args.batch), 1))
+    chunks = np.array_split(np.arange(min_, (max_//2)+min_), max((max_)//(args.incr * args.batch), 1))
     for ic, chunk in enumerate(chunks):
         writer = PdfWriter()
         for i in chunk:
