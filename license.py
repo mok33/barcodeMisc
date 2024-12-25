@@ -177,38 +177,33 @@ def select_bounding_box(pdf_path):
 def add_text_to_pdf(template_pdf_path, output_pdf_path, row, col, montant='', annee='', gare=''):
     # Open the template PDF
     pdf_document = fitz.open(template_pdf_path)
-    page = pdf_document.load_page(0)
-    offset = 400+20
-    offsetx, offsety = 186, 198+9
-    # Iterate over each page
-    for idx in range(1):
-        
-        # Set text properties
-        text_font = "helvetica-bold"
-        text_size = 9
-        text_color = (0, 0, 0)  # Black color in RGB
+    page = pdf_document[0]  # Load the first page
 
-        # Add text to specific positions
-        # page.insert_text((100, 700), f"Montant: {montant}", fontname=text_font, fontsize=text_size, color=text_color, rotate=90)
-        page.insert_text((54+10+row *(offsetx), 89 - 8 + col * offsety), f"{montant}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
-        page.insert_text((142+row *(offsetx), 89 + 7 + col * offsety), f"{gare}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
-        page.insert_text((142+15+row *(offsetx), 89 - 8 + col * offsety), f"{annee}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
+    # Set text properties
+    text_font = "helvetica-bold"
+    text_size = 9
+    text_color = (0, 0, 0)  # Black color in RGB
 
+    # Offsets for positioning
+    offsetx, offsety = 186, 198 + 9
 
-        # page.insert_text((53, 763-(offset*idx)), f"{gare}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
-        # page.insert_text((53, 50), f"{annee}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
-        # page.insert_text((69, 745-(offset*idx)), f"{montant}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
+    # Define bounding boxes for text placement
+    montant_box = (54 + 10 + row * offsetx, 89 - 8 + col * offsety, 54 + 110 + row * offsetx, 89 + 12 + col * offsety)
+    gare_box = (142 + row * offsetx, 89 + 7 + col * offsety, 142 + 100 + row * offsetx, 89 + 27 + col * offsety)
+    annee_box = (142 + 15 + row * offsetx, 89 - 8 + col * offsety, 142 + 115 + row * offsetx, 89 + 12 + col * offsety)
 
-        # page.insert_text((53+125, 763-(offset*idx)), f"{gare}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
-        # page.insert_text((53+125+1, 700-(offset*idx)), f"{annee}", fontname=text_font, fontsize=text_size, color=text_color, rotate=0)
-
-        # page.insert_text((70+233, 770-100-(offset*idx)), f"{montant}", fontname=text_font, fontsize=text_size+8, color=text_color, rotate=0)
+    # Add text to the PDF using textboxes
+    page.insert_textbox(montant_box, montant, fontname=text_font, fontsize=text_size, color=text_color)
+    page.insert_textbox(gare_box, gare, fontname=text_font, fontsize=text_size, color=text_color)
+    page.insert_textbox(annee_box, annee, fontname=text_font, fontsize=text_size, color=text_color)
 
     # Save the modified PDF to the output path
     pdf_document.save(output_pdf_path, incremental=True, encryption=fitz.PDF_ENCRYPT_KEEP)
     pdf_document.close()
 
     return output_pdf_path
+
+
 # Main logic to generate barcode and place it using the selected bounding box
 if __name__ == "__main__":
     from tqdm import tqdm
@@ -239,8 +234,9 @@ if __name__ == "__main__":
     outdir = os.path.join("output", "licenses", "{}-{}{}".format(args.gare, args.barcodeprefix, os.path.sep))
     os.makedirs(outdir, exist_ok=True)
     cpt = 0
+    # ncarnet = args.ncarnet
     ncarnet = (args.ncarnet + args.ncarnet%2)
-    max_ = ncarnet * (50 if args.carnet25 else 200 if args.carnet100 else 100)
+    max_ = ncarnet * (100 if args.carnet25 else 200 if args.carnet100 else 100)
     import datetime
     date = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     pbar = tqdm(total=max_//4)
