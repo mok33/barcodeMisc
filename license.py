@@ -216,7 +216,7 @@ if __name__ == "__main__":
     parser.add_argument("--pdftemplate", required=True, help="Path to save the output PDF with the barcode")
     parser.add_argument("--gare", required=True, help="Path to save the output PDF with the barcode")
     parser.add_argument("--annee", required=True, help="Path to save the output PDF with the barcode")
-    parser.add_argument("--montant", type=int, required=True, help="Path to save the output PDF with the barcode")
+    parser.add_argument("--montant", type=str, required=True, help="Path to save the output PDF with the barcode")
     parser.add_argument("--barcodeprefix", required=True, help="Text to encode in the barcode")
     parser.add_argument("--output", default='res.pdf', help="Path to save the output PDF with the barcode")
     parser.add_argument("--min", type=int, default=1, help="Path to save the output PDF with the barcode")
