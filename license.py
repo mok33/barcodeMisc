@@ -188,9 +188,9 @@ def add_text_to_pdf(template_pdf_path, output_pdf_path, row, col, montant='', an
     offsetx, offsety = 186, 198 + 9
 
     # Define bounding boxes for text placement
-    montant_box = (54 + 10 + row * offsetx, 89 - 8 + col * offsety, 54 + 110 + row * offsetx, 89 + 12 + col * offsety)
-    gare_box = (142 + row * offsetx, 89 + 7 + col * offsety, 142 + 100 + row * offsetx, 89 + 27 + col * offsety)
-    annee_box = (142 + 15 + row * offsetx, 89 - 8 + col * offsety, 142 + 115 + row * offsetx, 89 + 12 + col * offsety)
+    montant_box = (54 + 10 + row * offsetx, 89 - 17 + col * offsety, 54 + 110 + row * offsetx, 89 + 12 + col * offsety)
+    gare_box = (142 + row * offsetx, 89 + 7 - 9 + col * offsety, 142 + 100 + row * offsetx, 89 + 27 + col * offsety)
+    annee_box = (142 + 15 + row * offsetx, 89 - 8 - 9 + col * offsety, 142 + 115 + row * offsetx, 89 + 12 + col * offsety)
 
     # Add text to the PDF using textboxes
     page.insert_textbox(montant_box, montant, fontname=text_font, fontsize=text_size, color=text_color)
