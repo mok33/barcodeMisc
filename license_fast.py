@@ -27,11 +27,12 @@ def process_chunk(params):
         add_first_page_to_pdf(output_pdf_path, writer)
 
     # Combine processed PDFs for this chunk
-    chunk_output = f"{outdir}chunk_{chunk[0]}_to_{chunk[-1]}.pdf"
-    with open(chunk_output, "wb") as output_pdf:
-            writer.write(output_pdf)
+    if len(chunk) > 0:
+        chunk_output = f"{outdir}chunk_{chunk[0]}_to_{chunk[-1]}.pdf"
+        with open(chunk_output, "wb") as output_pdf:
+                writer.write(output_pdf)
     # merge_pdfs(output_files, chunk_output)
-    return chunk_output
+        return chunk_output
 
 def merge_pdfs(pdf_paths, output_path):
     """Merge multiple PDFs into a single PDF using fitz."""
@@ -67,7 +68,11 @@ if __name__ == "__main__":
     os.makedirs(tmpdir, exist_ok=True)
     os.makedirs(outdir, exist_ok=True)
     ncarnet = (args.ncarnet + args.ncarnet%2)
-    max_items = args.ncarnet * (100 if args.carnet25 else 200 if args.carnet100 else 100)
+    if args.carnet25:
+        ncarnet = int(np.ceil(ncarnet / 4) * 4)
+
+    # ncarnet = args.ncarnet
+    max_items = ncarnet * (25 if args.carnet25 else 100 if args.carnet100 else 100)
     chunks = np.array_split(np.arange(1, max_items // 4 + 1), cpu_count())
     # process_chunk((0, chunks[0], args, template_pdf_path, "barcode_image", tmpdir))
     # Use multiprocessing Pool to parallelize
