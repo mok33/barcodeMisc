@@ -242,7 +242,7 @@ if __name__ == "__main__":
     import datetime
     date = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     pbar = tqdm(total=max_//4)
-    chunks = np.array_split(np.arange(1, max_//4+1), max((max_)//(30*50), 1))
+    chunks = np.array_split(np.arange(args.min, (max_//4+1)+args.min), max((max_)//(30*50), 1))
 
     for ic, chunk in enumerate(chunks):
         writer = PdfWriter()
