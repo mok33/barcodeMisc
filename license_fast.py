@@ -16,18 +16,15 @@ def process_chunk(params):
     for i in tqdm(chunk):
         tmp = template_pdf_path
         output_pdf_path =  args.output.replace(".pdf",  "_{}.pdf".format(iw))
-        if i < args.min:
-            continue
-        else:
-            for j in range(4 * 3):
-                row, col = j // 3, j % 3
-                if col == 0:
-                    text_to_encode = f"{args.barcodeprefix}{str(i + (((max_items) // 4) * row)).zfill(7)}"
-                    barcode_svg_path = generate_barcode_svg(text_to_encode, barcode_filename)
-                output_pdf_path = draw_barcode(barcode_svg_path, tmp, output_pdf_path, row, col)
-                add_text_to_pdf(output_pdf_path, output_pdf_path, col, row, args.montant, args.annee, args.gare)
-                tmp = output_pdf_path
-            add_first_page_to_pdf(output_pdf_path, writer)
+        for j in range(4 * 3):
+            row, col = j // 3, j % 3
+            if col == 0:
+                text_to_encode = f"{args.barcodeprefix}{str(i + (((max_items) // 4) * row)).zfill(7)}"
+                barcode_svg_path = generate_barcode_svg(text_to_encode, barcode_filename)
+            output_pdf_path = draw_barcode(barcode_svg_path, tmp, output_pdf_path, row, col)
+            add_text_to_pdf(output_pdf_path, output_pdf_path, col, row, args.montant, args.annee, args.gare)
+            tmp = output_pdf_path
+        add_first_page_to_pdf(output_pdf_path, writer)
 
     # Combine processed PDFs for this chunk
     if len(chunk) > 0:
@@ -76,7 +73,9 @@ if __name__ == "__main__":
 
     # ncarnet = args.ncarnet
     max_items = ncarnet * (25 if args.carnet25 else 100 if args.carnet100 else 100)
-    chunks = np.array_split(np.arange(1, max_items // 4 + 1), cpu_count())
+    # max_items = args.min+max_items
+    chunks = np.array_split(args.min + np.arange(0, max_items // 4), cpu_count())
+    
     # process_chunk((0, chunks[0], args, template_pdf_path, "barcode_image", tmpdir))
     # Use multiprocessing Pool to parallelize
     with Pool(processes=cpu_count()) as pool:
